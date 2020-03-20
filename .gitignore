@@ -91,3 +91,4 @@ typings/
 .DS_Store
 count.js
 deploy.sh
+yarn.lock

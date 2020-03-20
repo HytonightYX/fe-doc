@@ -76,7 +76,7 @@ function _walk(dir) {
 
     ret.push({
       title: dirname,
-      collapsable: true,
+      collapsable: false,
       children: [...fs.readdirSync(dirpath).filter(item => item !== '.DS_Store').map(item => `${dirname}/${item}`.replace('.md', ''))]
     })
   })

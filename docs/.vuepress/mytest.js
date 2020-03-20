@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const docPath = path.resolve(__dirname, '../guide')
+const docPath = path.resolve(__dirname, '../fedoc')
 
 function _walk(dir) {
   const fs = require('fs')
@@ -9,7 +9,6 @@ function _walk(dir) {
   list = list.filter(item => item !== '.DS_Store' && item !== 'readme.md')
   const ret = []
   list.forEach(dirname => {
-    // if (dirname === '.DS_Store') continue
     const dirpath = dir + '/' + dirname
 
     ret.push({

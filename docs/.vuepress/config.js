@@ -1,12 +1,12 @@
 const { fs, path } = require('@vuepress/shared-utils')
-const docPath = path.resolve(__dirname, '../guide')
+const docPath = path.resolve(__dirname, '../fedoc')
 
 module.exports = ctx => ({
   locales: {
     '/': {
       lang: 'zh-CN',
-      title: '前端面试与进阶指南',
-      description: '可能是全网最给力的前端面试项目'
+      title: '云息的面试资料库',
+      description: 'Code for a better world!'
     }
   },
   head: [
@@ -30,7 +30,7 @@ module.exports = ctx => ({
         editLinkText: '在 GitHub 上编辑此页',
         nav: require('./nav/zh'),
         sidebar: {
-          '/guide/': _walk(docPath)
+          '/fedoc/': _walk(docPath)
         }
       }
     }

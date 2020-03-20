@@ -12,6 +12,7 @@ RFC 规定 HTTP 的状态码为**三位数**，被分为五类:
 
 ### 1xx
 
+**100 Continue** 继续，一般在发送 post 请求时，已发送了 http header 之后服务端将返回此信息，表示确认，之后发送具体参数信息
 **101 Switching Protocols**。在`HTTP`升级为`WebSocket`的时候，如果服务器同意变更，就会发送状态码 101。
 
 ### 2xx
@@ -66,23 +67,21 @@ RFC 规定 HTTP 的状态码为**三位数**，被分为五类:
 
 **503 Service Unavailable**: 表示服务器当前很忙，暂时无法响应服务。
 
-
-
-### CORS库源码的原理是什么？
+### CORS 库源码的原理是什么？
 
 ```javascript
-http.createServer((request, response) => {
-  response.writeHead(200, {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'X-Custom-Header',
-    'Access-Control-Allow-Methods': 'PUT, DELETE',
-    'Access-Control-Max-Age': '1000',
+http
+  .createServer((request, response) => {
+    response.writeHead(200, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'X-Custom-Header',
+      'Access-Control-Allow-Methods': 'PUT, DELETE',
+      'Access-Control-Max-Age': '1000'
+    })
+    response.end('3011')
   })
-  response.end('3011')
-}).listen(port)
+  .listen(port)
 ```
-
-
 
 ### 简单请求和非简单请求是什么？
 
@@ -94,20 +93,18 @@ http.createServer((request, response) => {
 - GET
 - POST
 
-2. HTTP的头信息 Request Headers 不超出以下几种字段
+2. HTTP 的头信息 Request Headers 不超出以下几种字段
 
 - Accept
 - Accept-Language
 - Content-Language
 - Last-Event-ID
-- Content-Type 只限于三个值application/x-www-form-urlencoded、multipart/form-data、text/plain
+- Content-Type 只限于三个值 application/x-www-form-urlencoded、multipart/form-data、text/plain
 
 凡是不同时满足上面两个条件，就属于非简单请求。
 
 浏览器对这两种请求的处理，是不一样的。
 
-
-
 ### Vary
 
-**`Vary`** 是一个HTTP响应头部
+**`Vary`** 是一个 HTTP 响应头部

@@ -1,34 +1,32 @@
 # React基础
 
-
-
-## 生命周期
-
-### React最新的生命周期是怎样的?
+## React最新的生命周期是怎样的?
 
 [参考](https://juejin.im/post/5b6f1800f265da282d45a79a#heading-0)
 
-#### 挂载阶段
+### 挂载阶段
 
 - constructor
 - getDerivedStateFromProps
-- UNSAVE_componentWillMount
-- render
-- componentDidMount
+- UNSAVE_componentWillMount 组件即将被装载、渲染到页面上
+- render 组件在这里生成虚拟的`DOM`节点
+- componentDidMount 组件真正在被装载之后
 
-#### 更新阶段
+### 更新阶段
 
 更新阶段，当组件的props改变了，或组件内部调用了setState或者forceUpdate发生，会发生多次
 
-- UNSAFE_componentWillReceiveProps
+- UNSAFE_componentWillReceiveProps 组件将要接收到属性的时候调用
 - getDerivedStateFromProps
 - shouldComponentUpdate
-- UNSAFE_componentWillUpdate
+- UNSAFE_componentWillUpdate 组件即将更新不能修改属性和状态
 - render
 - getSnapshotBeforeUpdate
 - componentDidUpdate
 
-#### 卸载阶段
+
+
+### 卸载阶段
 
 - componentWillUnmount
 
@@ -38,15 +36,24 @@
 
 
 
-### ajax 应该放在哪个生命周期中？
+## ajax 应该放在哪个生命周期中？
 
-componentDidMount。
-
-要渲染完之后再发起ajax请求，这样整个应用更加流畅
-
+- `React` 下一代调和算法 `Fiber` 会通过开始或停止渲染的方式优化应用性能，其会影响到 `componentWillMount` 的触发次数。对于 `componentWillMount` 这个生命周期函数的调用次数会变得不确定，`React` 可能会多次频繁调用 `componentWillMount`。如果我们将 `AJAX` 请求放到 `componentWillMount` 函数中，那么可能会被触发多次，自然也就不是好的选择。
+- 如果我们将`AJAX` 请求放置在生命周期的其他函数中，我们并不能保证请求仅在组件挂载完毕后才会要求响应。如果我们的数据请求在组件挂载之前就完成，并且调用了`setState`函数将数据添加到组件状态中，对于未挂载的组件则会报错。而在 `componentDidMount` 函数中进行 `AJAX` 请求则能有效避免这个问题
 
 
-### shouldComponentUpdate 如何配合性能优化
+
+## diff 算法做了哪些优化？
+
+- 把树形结构按照层级分解，只比较同级元素。
+- 给列表结构的每个单元添加唯一的`key`属性，方便比较。
+- `React` 只会匹配相同  tag  的 `component`（这里面的`class`指的是组件的名字）
+- 合并操作，调用 `component` 的 `setState` 方法的时候, `React` 将其标记为 - `dirty`.到每一个事件循环结束, `React` 检查所有标记 `dirty`的 `component`重新绘制.
+- 选择性子树渲染。开发人员可以重写`shouldComponentUpdate`提高`diff`的性能
+
+
+
+## shouldComponentUpdate 如何配合性能优化
 
 **scu 有什么用？背后逻辑是什么？**
 
@@ -75,9 +82,15 @@ componentDidMount。
 
 
 
-## 组件
+## React 中 keys 的作用是什么？
 
-### 函数组件和 class 组件的区别？
+` Keys`是 `React` 用于追踪哪些列表中元素被修改、被添加或者被移除的辅助标识
+
+- 在开发过程中，我们需要保证某个元素的 `key` 在其同级元素中具有唯一性。在 `React Diff` 算法中`React` 会借助元素的 `Key` 值来判断该元素是新近创建的还是被移动而来的元素，从而减少不必要的元素重渲染。此外，React 还需要借助 `Key` 值来判断元素与本地状态的关联关系，因此我们绝不可忽视转换函数中 `Key` 的重要性
+
+
+
+## 函数组件和 class 组件的区别？
 
 - 纯函数，输入 props，输出 JSX
 - 没有实例，没有生命周期，没有 state
@@ -85,7 +98,7 @@ componentDidMount。
 
 
 
-### setState 后发生了什么?
+## setState 后发生了什么?
 
 当给 setState 传入新对象时，React 内部会进行一种类似 Object.assign() 的方式对象合并，把需要更新的state合并后放入状态队列，利用这个队列可以更加高效的批量更新state；当参数为函数时，React会将所有更新组成队列，并且按顺序来执行，这样避免了将state合并成一个对象的问题，之后会启动一个`reconciliation`调和过程，即创建一个新的 React Element tree（UI层面的对象表示）并且和之前的tree作比较，基于你传递给setState的对象找出发生的变化，最后更新DOM中需改动的部分。
 
@@ -93,7 +106,9 @@ componentDidMount。
 
 
 
-### setState到底是异步还是同步?
+
+
+## setState到底是异步还是同步?
 
 看右边，开始处于 `batchUpdate` 中，`isBatchingUpdates = true`，接着开始执行 `setTimeout`，但是里面的 `setState` 是异步的，所以还没执行，紧接着 `isBatchingUpdates = false` 。因此之后 `setState` 执行的时候，`isBatchingUpdates = false` ，所以开始走流程图的右边了。
 
@@ -115,9 +130,7 @@ componentDidMount。
 
 
 
-
-
-### HOC 解决了什么问题？
+## HOC 解决了什么问题？
 
 抽离多个组件的公共逻辑
 
@@ -126,7 +139,7 @@ componentDidMount。
 
 
 
-### state 和 props 有什么区别？
+## state 和 props 有什么区别？
 
 一句话概括，props 是组件对外的接口，state 是组件对内的接口。
 
@@ -158,7 +171,7 @@ componentDidMount。
 
  
 
-### PureComponent 纯组件 和 memo
+## PureComponent 纯组件 和 memo
 
 - PureComponent，memo 实现了 SCU 中的浅比较（只比较第一层）
 - memo 就是 PC 的函数组件版本
@@ -166,22 +179,20 @@ componentDidMount。
 
 
 
-### 什么是受控组件？
+## 什么是受控组件？
 - 表单的值，受 state 控制
 - 需要自行监听 onChange 事件
 - 对比非受控组件
 
 
 
-## 其他
-
-### router 如何配置懒加载？
+## react-router 如何配置懒加载？
 
 ![image-20200318151935024](https://tva1.sinaimg.cn/large/00831rSTly1gcy3v85jpwj30tb0fsgtu.jpg)
 
 
 
-### 何为 fiber
+## 何为 fiber
 
 js 的单线程调度算法
 
@@ -197,7 +208,7 @@ react在进行组件渲染时，从setState开始到渲染完成整个过程是�
 
 
 
-### React 性能优化
+## React 性能优化
 
 - 减少 bind this
 - 合理使用 SCU，Pure 和 memo

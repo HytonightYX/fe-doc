@@ -1,4 +1,5 @@
 const { fs, path } = require('@vuepress/shared-utils')
+const docPath = path.resolve(__dirname, '../guide')
 
 module.exports = ctx => ({
   locales: {
@@ -18,7 +19,7 @@ module.exports = ctx => ({
     ['link', { rel: 'mask-icon', href: '/icons/safari-pinned-tab.svg', color: '#3eaf7c' }],
     ['meta', { name: 'msapplication-TileImage', content: '/icons/msapplication-icon-144x144.png' }],
     ['meta', { name: 'msapplication-TileColor', content: '#000000' }],
-    ['meta', { name: 'apple-mobile-web-app-status-bar-style',  }]
+    ['meta', { name: 'apple-mobile-web-app-status-bar-style', }]
   ],
   themeConfig: {
     repo: 'xiaomuzhu/front-end-interview',
@@ -29,7 +30,7 @@ module.exports = ctx => ({
         editLinkText: '在 GitHub 上编辑此页',
         nav: require('./nav/zh'),
         sidebar: {
-            '/guide/': renderSiderBar()
+          '/guide/': _walk(docPath)
         }
       }
     }
@@ -64,154 +65,20 @@ module.exports = ctx => ({
   ]
 })
 
-function renderSiderBar() {
-  return ([{
-      title: '前言',
-      collapsable: false,
-      children: [
-            '',
-            'preface'
-        ]
-  },
-  {
-    title: '面试技巧',
-    collapsable: false,
-    children: [
-          'resume',
-          'project',
-          'hr',
-      ]
-  },
-  {
-    title: '推荐',
-    collapsable: false,
-    children: [
-          'book'
-      ]
-  },
-  {
-      title: '前端基础',
-      collapsable: false,
-      children: [
-        'htmlBasic',
-        'cssBasic',
-        'jsBasic',
-        'browser',
-        'dom',
-        // 'designPatterns',
-      ]
-  },
-  {
-    title: '前端基础笔试',
-    collapsable: false,
-    children: [
-      'httpWritten',
-      'jsWritten',
-    ]
-},
-{
-  title: '前端原理详解',
-  collapsable: false,
-  children: [
-    'hoisting',
-    'eventLoop',
-    'immutable',
-    'memory',
-    'deepclone',
-    'event',
-    'mechanism',
-  ]
-},
-{
-  title: '计算机基础',
-  collapsable: true,
-  children: [
-        'http',
-        'tcp',
-    ]
-},
-{
-  title: '数据结构与算法',
-  collapsable: false,
-  children: [
-        'algorithm',
-        'string',
-    ]
-},
-{
-  title: '前端框架',
-  collapsable: false,
-  children: [
-        'framework',
-        'vue',
-        'react',
-    ]
-},
-{
-  title: '框架原理详解',
-  collapsable: true,
-  children: [
-        'virtualDom',
-        'devsProxy',
-        'setState',
-        'router',
-        'redux',
-        'fiber',
-        'abstract',
-        'reactHook',
-    ]
-},
-{
-  title: '框架实战技巧',
-  collapsable: true,
-  children: [
-        'componentCli',
-        'component',
-        'carousel',
-    ]
-},
-{
-  title: '性能优化',
-  collapsable: true,
-  children: [
-        'load',
-        'execute',
-    ]
-},
-{
-  title: '工程化',
-  collapsable: true,
-  children: [
-        'webpack',
-        'engineering',
-    ]
-},
-{
-  title: '工程化原理',
-  collapsable: true,
-  children: [
-        'ast',
-        'WebpackHMR',
-        'webpackPlugin',
-        'webpackPluginDesign',
-        'webpackMoudle',
-        'webpackLoader',
-        'babelPlugin',
-    ]
-},
-{
-  title: '安全',
-  collapsable: true,
-  children: [
-        'security',
-    ]
-},
-// {
-//   title: 'Node',
-//   collapsable: true,
-//   children: [
-//         'node',
-//     ]
-// },
-])
+function _walk(dir) {
+  const fs = require('fs')
+  var list = fs.readdirSync(dir)
+  list = list.filter(item => item !== '.DS_Store' && item !== 'readme.md')
+  const ret = []
+  list.forEach(dirname => {
+    // if (dirname === '.DS_Store') continue
+    const dirpath = dir + '/' + dirname
+
+    ret.push({
+      title: dirname,
+      collapsable: true,
+      children: [...fs.readdirSync(dirpath).filter(item => item !== '.DS_Store').map(item => `${dirname}/${item}`.replace('.md', ''))]
+    })
+  })
+  return ret
 }

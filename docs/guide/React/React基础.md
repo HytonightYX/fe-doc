@@ -1,0 +1,206 @@
+# React基础
+
+
+
+## 生命周期
+
+### React最新的生命周期是怎样的?
+
+[参考](https://juejin.im/post/5b6f1800f265da282d45a79a#heading-0)
+
+#### 挂载阶段
+
+- constructor
+- getDerivedStateFromProps
+- UNSAVE_componentWillMount
+- render
+- componentDidMount
+
+#### 更新阶段
+
+更新阶段，当组件的props改变了，或组件内部调用了setState或者forceUpdate发生，会发生多次
+
+- UNSAFE_componentWillReceiveProps
+- getDerivedStateFromProps
+- shouldComponentUpdate
+- UNSAFE_componentWillUpdate
+- render
+- getSnapshotBeforeUpdate
+- componentDidUpdate
+
+#### 卸载阶段
+
+- componentWillUnmount
+
+当我们的组件被卸载或者销毁了就会调用，我们可以在这个函数里去清除一些定时器，取消网络请求，清理无效的DOM元素等垃圾清理工作
+
+注意不要在这个函数里去调用setState，因为组件不会重新渲染了
+
+
+
+### ajax 应该放在哪个生命周期中？
+
+componentDidMount。
+
+要渲染完之后再发起ajax请求，这样整个应用更加流畅
+
+
+
+### shouldComponentUpdate 如何配合性能优化
+
+**scu 有什么用？背后逻辑是什么？**
+
+- 默认返回true。父组件更新，所有子组件无条件更新
+
+**既然scu这么好，为什么还给你提供自定义的能力，不给他直接实现到框架内部呢？**
+
+- 因为一定要配合不可变值
+- 所以有的开发者会使用不合规范的写法，导致不发生重渲染
+
+**比较的时候如何有什么要注意的问题？**
+
+- 用_.isEqual JSON.stringfy() 深度比较会非常耗费性能
+- 所以设计 state 的时候不要层级太深
+- 使用浅比较，浅比较已经适用大部分情况了
+- 另外可以自定义比较
+
+
+
+拓展：immutable.js
+
+- 彻底拥抱不可变值
+- 解决了什么问题？深拷贝性能太差，immutable.js 基于共享数据和结构，性能好
+- 有一定学习和使用成本
+- [Immer](https://github.com/mweststrate/immer) 是 mobx 的作者写的一个 immutable 库，核心实现是利用 ES6 的 proxy，几乎以最小的成本实现了 js 的不可变数据结构
+
+
+
+## 组件
+
+### 函数组件和 class 组件的区别？
+
+- 纯函数，输入 props，输出 JSX
+- 没有实例，没有生命周期，没有 state
+- 不能拓展其他方法
+
+
+
+### setState 后发生了什么?
+
+当给 setState 传入新对象时，React 内部会进行一种类似 Object.assign() 的方式对象合并，把需要更新的state合并后放入状态队列，利用这个队列可以更加高效的批量更新state；当参数为函数时，React会将所有更新组成队列，并且按顺序来执行，这样避免了将state合并成一个对象的问题，之后会启动一个`reconciliation`调和过程，即创建一个新的 React Element tree（UI层面的对象表示）并且和之前的tree作比较，基于你传递给setState的对象找出发生的变化，最后更新DOM中需改动的部分。
+
+![image-20200226074600085](https://tva1.sinaimg.cn/large/0082zybply1gc9gqugd88j30ht0cemz9.jpg)
+
+
+
+### setState到底是异步还是同步?
+
+看右边，开始处于 `batchUpdate` 中，`isBatchingUpdates = true`，接着开始执行 `setTimeout`，但是里面的 `setState` 是异步的，所以还没执行，紧接着 `isBatchingUpdates = false` 。因此之后 `setState` 执行的时候，`isBatchingUpdates = false` ，所以开始走流程图的右边了。
+
+-  同步异步不是由 setState 自己决定的
+-  就是看能否命中 batchUpdate 机制
+-  判断 `isBatchingUpdate`
+
+**能命中 batchUpdate 机制：**
+
+- 生命周期以及其调用的函数
+- React 中注册的事件（和它调用的函数）
+- React 可以“管理”的入口
+
+**不能命中：**
+
+- setTimeout，setInterval（和它调用的函数）
+- 自定义的 DOM 事件
+- React “管不到” 的入口，不是 React 那儿注册的
+
+
+
+
+
+### HOC 解决了什么问题？
+
+抽离多个组件的公共逻辑
+
+- HOC
+- Render Props
+
+
+
+### state 和 props 有什么区别？
+
+一句话概括，props 是组件对外的接口，state 是组件对内的接口。
+
+`state` 的主要作用是用于组件保存、控制、修改*自己*的可变状态。`state` 在组件内部初始化，可以被组件自身修改，而外部不能访问也不能修改。你可以认为 `state` 是一个局部的、只能被组件自身控制的数据源。`state` 中状态可以通过 `this.setState` 方法进行更新，`setState` 会导致组件的重新渲染。
+
+`props` 的主要作用是让使用该组件的父组件可以传入参数来配置该组件。它是外部传进来的配置参数，组件内部无法控制也无法修改。
+
+`state` 和 `props` 有着千丝万缕的关系。它们都可以决定组件的行为和显示形态。一个组件的 `state` 中的数据可以通过 `props` 传给子组件，一个组件可以使用外部传入的 `props` 来初始化自己的 `state`。但是它们的职责其实非常明晰分明：*`state` 是让组件控制自己的状态，`props` 是让外部对组件自己进行配置*。
+
+如果你觉得还是搞不清 `state` 和 `props` 的使用场景，那么请记住一个简单的规则：尽量少地用 `state`，尽量多地用 `props`。
+
+没有 `state` 的组件叫无状态组件（stateless component），设置了 state 的叫做有状态组件（stateful component）。因为状态会带来管理的复杂性，我们尽量多地写无状态组件，尽量少地写有状态的组件。这样会降低代码维护的难度，也会在一定程度上增强组件的可复用性。前端应用状态管理是一个复杂的问题，我们后续会继续讨论。
+
+| 场景                         | props  | state  |
+| :--------------------------- | :----- | :----- |
+| 是否可以从父组件中获取初始值 | 可以   | 可以   |
+| 是否能被父组件改变           | 可以   | 不可以 |
+| 是否能设置默认值             | 可以   | 不可以 |
+| 是否在组件里改变值           | 不可以 | 可以   |
+| 能否给子组件设置初始值       | 可以   | 可以   |
+| 能否在子组件里被改变值       | 可以   | 可以   |
+
+**总结一下**：
+
+1. props用于定义外部接口，使用state来存储控制当前页面逻辑的数据；
+2. props的赋值是在父级组件，state赋值在当前组件内部；
+3. props是不可变的，而state是可变的；
+4. 使用props比state会有更好的性能；
+
+ 
+
+### PureComponent 纯组件 和 memo
+
+- PureComponent，memo 实现了 SCU 中的浅比较（只比较第一层）
+- memo 就是 PC 的函数组件版本
+- 必须配合不可变值
+
+
+
+### 什么是受控组件？
+- 表单的值，受 state 控制
+- 需要自行监听 onChange 事件
+- 对比非受控组件
+
+
+
+## 其他
+
+### router 如何配置懒加载？
+
+![image-20200318151935024](https://tva1.sinaimg.cn/large/00831rSTly1gcy3v85jpwj30tb0fsgtu.jpg)
+
+
+
+### 何为 fiber
+
+js 的单线程调度算法
+
+[fiber介绍](https://juejin.im/post/5ab7b3a2f265da2378403e57)
+
+react在进行组件渲染时，从setState开始到渲染完成整个过程是同步的（“一气呵成”）。如果需要渲染的组件比较庞大，js执行会占据主线程时间较长，会导致页面响应度变差，使得react在动画、手势等应用中效果比较差。
+
+为了解决这个问题，react团队经过两年的工作，重写了react中核心算法——[reconciliation](https://reactjs.org/docs/reconciliation.html)。并在v16版本中发布了这个新的特性。为了区别之前和之后的reconciler，通常将之前的reconciler称为stack reconciler，重写后的称为fiber reconciler，简称为Fiber。
+
+- 将 reconciliation（重写了） 阶段进行拆分（commit无法拆分，一次执行完）
+- DOM 需要渲染时候暂停，空闲时恢复
+- 何时暂停何时恢复呢？ [window.requestIdleCallback](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback) (Edge,IE,Safari不支持，用 polyfill)
+
+
+
+### React 性能优化
+
+- 减少 bind this
+- 合理使用 SCU，Pure 和 memo
+- webpack 层面的优化
+- 前端通用的，比如图片懒加载，base64，CSS
+- 使用SSR

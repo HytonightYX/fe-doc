@@ -92,3 +92,4 @@ typings/
 count.js
 deploy.sh
 yarn.lock
+docs/.vuepress/dist
